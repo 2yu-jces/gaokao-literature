@@ -182,17 +182,23 @@ function beijingNow(){
 
 
 /* ===== 判断是否解锁 ===== */
-
 function unlocked(item){
 
   const now = beijingNow();
 
+  // 第一天 2026-10-03 立即开放
+  if(item.date === "2026-10-03")
+    return true;
+
+  // 以前日期全部开放
   if(item.date < now.date)
     return true;
 
+  // 未来日期锁定
   if(item.date > now.date)
     return false;
 
+  // 当天北京时间 22:00 后开放
   return now.hour >= 22;
 }
 
