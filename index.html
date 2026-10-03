@@ -1,14 +1,471 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f2e7"><link rel="manifest" href="./manifest.json"><link rel="apple-touch-icon" href="./icon-192.png"><title>高考文学素材每日积累</title>
-<style>body{margin:0;background:#f7f2e7;color:#303730;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}.app{max-width:760px;margin:auto;padding:24px 18px 90px}h1{font-family:Georgia,"Songti SC",serif;font-size:27px;margin:0}.sub,.status{color:#77786f;margin-top:7px}.status{font-size:12px}.tabs{display:flex;gap:8px;padding:16px 0;position:sticky;top:0;background:#f7f2e7}.tab{border:1px solid #ddd4c3;background:#fffdf8;border-radius:999px;padding:9px 13px}.tab.on{background:#303730;color:white}.search{width:100%;box-sizing:border-box;padding:12px;border:1px solid #ddd4c3;border-radius:12px;font-size:16px}.card{background:#fffdf8;border:1px solid #ddd4c3;border-radius:18px;padding:22px;margin:16px 0}.day{color:#a78852;font-weight:bold}.fav{float:right;border:0;background:none;font-size:20px}.quote{font-family:Georgia,"Songti SC",serif;font-size:23px;line-height:1.6;margin:14px 0}.meta{color:#77786f;border-bottom:1px solid #ddd4c3;padding-bottom:14px}.text{line-height:1.85}.empty{text-align:center;color:#77786f;padding:50px}</style></head>
-<body><main class="app"><h1>高考文学素材每日积累</h1><div class="sub">每日一页 · 少而精 · 为议论文真正积累</div><div id="status" class="status">正在读取素材库…</div><nav class="tabs"><button class="tab on" data-mode="today">今日</button><button class="tab" data-mode="all">历史</button><button class="tab" data-mode="fav">收藏</button><button class="tab" data-mode="search">搜索</button></nav><div id="searchBox" hidden><input id="q" class="search" placeholder="搜索名言、作者、名著、论点…"></div><section id="view"></section></main>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f2e7">
+
+  <title>高考文学素材</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+
+  <style>
+    body{
+      margin:0;
+      background:#f7f2e7;
+      color:#303730;
+      font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",
+      "Microsoft YaHei",sans-serif;
+    }
+
+    .app{
+      max-width:720px;
+      margin:auto;
+      padding:22px 18px 80px;
+    }
+
+    h1{
+      font-size:25px;
+      margin:8px 0 5px;
+    }
+
+    .sub{
+      color:#777;
+      font-size:14px;
+      margin-bottom:22px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:18px;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:10px 15px;
+      background:#e9e2d4;
+      color:#303730;
+      font-size:14px;
+    }
+
+    button.active{
+      background:#303730;
+      color:white;
+    }
+
+    .card{
+      background:white;
+      border-radius:18px;
+      padding:20px;
+      box-shadow:0 3px 14px rgba(0,0,0,.06);
+      margin-bottom:15px;
+    }
+
+    .date{
+      font-size:13px;
+      color:#999;
+      margin-bottom:15px;
+    }
+
+    .quote{
+      font-family:serif;
+      font-size:24px;
+      line-height:1.55;
+      margin-bottom:12px;
+    }
+
+    .author{
+      text-align:right;
+      color:#777;
+      margin-bottom:20px;
+    }
+
+    h2{
+      font-size:16px;
+      margin-top:20px;
+    }
+
+    p{
+      line-height:1.85;
+    }
+
+    .fav{
+      float:right;
+      cursor:pointer;
+      font-size:22px;
+    }
+
+    .status{
+      text-align:center;
+      color:#999;
+      font-size:12px;
+      margin-top:20px;
+    }
+
+    input{
+      width:100%;
+      box-sizing:border-box;
+      padding:13px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      font-size:16px;
+      margin-bottom:15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <h1>高考文学素材</h1>
+  <div class="sub">每日一页 · 真正可用于议论文</div>
+
+  <div class="tabs">
+    <button id="todayBtn" class="active">今日</button>
+    <button id="historyBtn">历史</button>
+    <button id="favBtn">收藏</button>
+    <button id="searchBtn">搜索</button>
+  </div>
+
+  <div id="content"></div>
+
+  <div class="status" id="status">正在读取素材库…</div>
+
+</div>
+
 <script>
-let DATA=[],fav=JSON.parse(localStorage.getItem('fav')||'[]'),mode='today';
-const view=document.getElementById('view'),statusEl=document.getElementById('status');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function card(x,i){let f=fav.includes(x.date);return `<article class="card"><div class="day">${esc(x.date||('第 '+(i+1)+' 页'))}<button class="fav" onclick="toggleFav('${esc(x.date)}')">${f?'★':'☆'}</button></div><div class="quote">“${esc(x.quote)}”</div><div class="meta">${esc(x.author)} · ${esc(x.source)}</div><h3>人物 / 名著素材</h3><div class="text">${esc(x.material)}</div><h3>核心论点</h3><div class="text">${esc(x.argument)}</div><h3>议论文运用示例</h3><div class="text">${esc(x.example)}</div></article>`}
-function render(){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));document.getElementById('searchBox').hidden=mode!=='search';let a=[...DATA];if(mode==='today')a=a.length?[a[a.length-1]]:[];if(mode==='fav')a=a.filter(x=>fav.includes(x.date));if(mode==='search'){let q=document.getElementById('q').value.trim().toLowerCase();a=q?a.filter(x=>JSON.stringify(x).toLowerCase().includes(q)):[]}view.innerHTML=a.length?a.map(card).join(''):`<div class="empty">${mode==='search'?'输入关键词开始搜索':'这里还没有素材'}</div>`}
-function toggleFav(d){fav=fav.includes(d)?fav.filter(x=>x!==d):[...fav,d];localStorage.setItem('fav',JSON.stringify(fav));render()}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});document.getElementById('q').oninput=render;
-async function load(){try{let r=await fetch('./data.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(r.status);let j=await r.json();DATA=Array.isArray(j)?j:(j.materials||[]);statusEl.textContent='素材库已连接 · 共 '+DATA.length+' 页'}catch(e){statusEl.textContent='素材库读取失败，请刷新后重试'}render()}
-if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});load();
-</script></body></html>
+
+let DATA = [];
+let mode = "today";
+
+let favorites =
+  JSON.parse(localStorage.getItem("favorites") || "[]");
+
+
+/* ===== 北京时间 ===== */
+
+function beijingNow(){
+
+  const now = new Date();
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "zh-CN",
+      {
+        timeZone:"Asia/Shanghai",
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit",
+        hour:"2-digit",
+        minute:"2-digit",
+        hourCycle:"h23"
+      }
+    ).formatToParts(now);
+
+  const obj = {};
+
+  parts.forEach(p=>{
+    obj[p.type]=p.value;
+  });
+
+  return {
+    date:
+      obj.year+"-"+obj.month+"-"+obj.day,
+    hour:Number(obj.hour),
+    minute:Number(obj.minute)
+  };
+}
+
+
+/* ===== 判断是否解锁 ===== */
+
+function unlocked(item){
+
+  const now = beijingNow();
+
+  if(item.date < now.date)
+    return true;
+
+  if(item.date > now.date)
+    return false;
+
+  return now.hour >= 22;
+}
+
+
+/* ===== 当前已经解锁的素材 ===== */
+
+function availableData(){
+
+  return DATA.filter(unlocked);
+
+}
+
+
+/* ===== HTML 安全处理 ===== */
+
+function esc(s){
+
+  return String(s || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+
+}
+
+
+/* ===== 素材卡片 ===== */
+
+function card(d){
+
+  const loved = favorites.includes(d.date);
+
+  return `
+    <div class="card">
+
+      <span class="fav"
+        onclick="toggleFavorite('${d.date}')">
+        ${loved ? "★" : "☆"}
+      </span>
+
+      <div class="date">${esc(d.date)}</div>
+
+      <div class="quote">
+        “${esc(d.quote)}”
+      </div>
+
+      <div class="author">
+        —— ${esc(d.author)}《${esc(d.source)}》
+      </div>
+
+      <h2>人物 / 名著素材</h2>
+      <p>${esc(d.material)}</p>
+
+      <h2>核心论点</h2>
+      <p>${esc(d.argument)}</p>
+
+      <h2>议论文运用示例</h2>
+      <p>${esc(d.example)}</p>
+
+    </div>
+  `;
+}
+
+
+/* ===== 收藏 ===== */
+
+function toggleFavorite(date){
+
+  if(favorites.includes(date)){
+
+    favorites =
+      favorites.filter(x=>x!==date);
+
+  }else{
+
+    favorites.push(date);
+
+  }
+
+  localStorage.setItem(
+    "favorites",
+    JSON.stringify(favorites)
+  );
+
+  render();
+
+}
+
+
+/* ===== 页面显示 ===== */
+
+function render(){
+
+  const content =
+    document.getElementById("content");
+
+  const available =
+    availableData();
+
+  document.querySelectorAll(".tabs button")
+    .forEach(x=>x.classList.remove("active"));
+
+
+  if(mode==="today"){
+
+    todayBtn.classList.add("active");
+
+    const latest =
+      available[available.length-1];
+
+    if(latest){
+
+      content.innerHTML = card(latest);
+
+    }else{
+
+      content.innerHTML =
+        `<div class="card">
+          今日素材将在北京时间 22:00 解锁。
+        </div>`;
+
+    }
+
+  }
+
+
+  if(mode==="history"){
+
+    historyBtn.classList.add("active");
+
+    content.innerHTML =
+      [...available]
+      .reverse()
+      .map(card)
+      .join("");
+
+  }
+
+
+  if(mode==="favorites"){
+
+    favBtn.classList.add("active");
+
+    const list =
+      available.filter(
+        x=>favorites.includes(x.date)
+      );
+
+    content.innerHTML =
+      list.length
+      ? list.reverse().map(card).join("")
+      : `<div class="card">暂时没有收藏。</div>`;
+
+  }
+
+
+  if(mode==="search"){
+
+    searchBtn.classList.add("active");
+
+    content.innerHTML = `
+      <input
+        id="searchInput"
+        placeholder="搜索人物、作品、名言、论点…"
+      >
+      <div id="results"></div>
+    `;
+
+    searchInput.oninput = function(){
+
+      const q =
+        this.value.trim().toLowerCase();
+
+      const result =
+        available.filter(d=>
+          JSON.stringify(d)
+          .toLowerCase()
+          .includes(q)
+        );
+
+      results.innerHTML =
+        q
+        ? result.map(card).join("")
+        : "";
+
+    };
+
+  }
+
+
+  document.getElementById("status")
+    .textContent =
+      `已解锁 ${available.length} 页 · 每日 22:00 更新`;
+
+}
+
+
+/* ===== 标签 ===== */
+
+todayBtn.onclick=()=>{
+  mode="today";
+  render();
+};
+
+historyBtn.onclick=()=>{
+  mode="history";
+  render();
+};
+
+favBtn.onclick=()=>{
+  mode="favorites";
+  render();
+};
+
+searchBtn.onclick=()=>{
+  mode="search";
+  render();
+};
+
+
+/* ===== 获取 data.json ===== */
+
+async function load(){
+
+  try{
+
+    const response =
+      await fetch(
+        "./data.json?ts="+Date.now(),
+        {cache:"no-store"}
+      );
+
+    const json =
+      await response.json();
+
+    DATA =
+      Array.isArray(json)
+      ? json
+      : (json.materials || []);
+
+    DATA.sort(
+      (a,b)=>a.date.localeCompare(b.date)
+    );
+
+    render();
+
+  }catch(e){
+
+    document.getElementById("content")
+      .innerHTML =
+      `<div class="card">
+        素材库读取失败，请稍后刷新。
+      </div>`;
+
+    document.getElementById("status")
+      .textContent="连接失败";
+
+  }
+
+}
+
+load();
+
+
+/* ===== PWA ===== */
+
+if("serviceWorker" in navigator){
+
+  navigator.serviceWorker.register("./sw.js");
+
+}
+
+</script>
+
+</body>
+</html>
